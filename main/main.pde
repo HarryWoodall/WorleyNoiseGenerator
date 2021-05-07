@@ -2,18 +2,31 @@ PShape can;
 float angle;
 PShader colorShader;
 
-int pointAmmount = 200;
+int pointAmmount = 400;
 float[] points = new float[pointAmmount * 3];
-int depth = 2000;
+int depth = 5000;
 float currentDepth = 0;
 
-float redDivider = random(350, 550);
-float greenDivider = random(350, 550);
-float blueDivider = random(350, 550);
+color color1 = color(0, 0, 0);
+color color2 = color(0, 0, 0);
 
-float deltaRed = random(0.007);
-float deltaGreen = random(0.007);
-float deltaBlue = random(0.007);
+float[] color1Deltas = {random(0.004, 0.007), random(0.004, 0.007), random(0.004, 0.007)};
+float[] color2Deltas = {random(0.004, 0.007), random(0.004, 0.007), random(0.004, 0.007)};
+
+float[] color1CurrentOffset = {random(0, TWO_PI), random(0, TWO_PI), random(0, TWO_PI)};
+float[] color2CurrentOffset = {random(0, TWO_PI), random(0, TWO_PI), random(0, TWO_PI)};
+
+enum ColorType {
+  DARK,
+  LIGHT
+}
+// float redDivider = random(350, 550);
+// float greenDivider = random(350, 550);
+// float blueDivider = random(350, 550);
+
+// float deltaRed = random(0.007);
+// float deltaGreen = random(0.007);
+// float deltaBlue = random(0.007);
 
 void setup() {
   fullScreen(P3D);
@@ -50,20 +63,49 @@ void draw() {
   vertex(0, height);
   endShape(CLOSE);
   
-  currentDepth += 0.002;
-  redDivider += deltaRed;
-  greenDivider += deltaGreen;
-  blueDivider += deltaGreen;
-
-  float redValue = 200 * (sin(redDivider) + 1 / 2) + 350;
-  float greenValue = 200 * (sin(greenDivider) + 1 / 2) + 350;
-  float blueValue = 200 * (sin(blueDivider) + 1 / 2) + 350;
+  currentDepth += 0.001;
+  color1 = changeColor(color1Deltas, color1CurrentOffset, ColorType.DARK);
+  color2 = changeColor(color2Deltas, color2CurrentOffset, ColorType.LIGHT);
   
   colorShader.set("dimentions", float(width), float(height));
   colorShader.set("points", points);
   colorShader.set("depth", ((sin(currentDepth) + 1) / 2) * depth);
-  colorShader.set("colorDiv", redValue, greenValue, blueValue);
+  colorShader.set("color1", red(color1), green(color1), blue(color1));
+  colorShader.set("color2", red(color2), green(color2), blue(color2));
   
-  println(frameRate);
+  println("color1- Red: " + red(color1) + " blue: " + blue(color1) + " green: " + green(color1));
+  println("color2- Red: " + red(color2) + " blue: " + blue(color2) + " green: " + green(color2));
+  println("deltas" + color1Deltas[0]);
+  //println(frameRate);
   //noLoop();
+}
+
+color changeColor(float[] deltas, float[] currentOffset, ColorType type) {
+  float minValue;
+  float maxValue;
+
+  switch(type) {
+    case DARK:
+      minValue = 10;
+      maxValue = 90;
+      break;
+    case LIGHT:
+      minValue = 100;
+      maxValue = 255;
+      break;
+    default :
+      minValue = 50;
+      maxValue = 255;
+    break;	
+  }
+
+  for (int i = 0; i < deltas.length; i++) {
+    currentOffset[i] += deltas[i];
+  }
+  
+  float newRed = (maxValue - minValue) * ((sin(currentOffset[0]) + 1) / 2) + minValue;
+  float newGreen = (maxValue - minValue) * ((sin(currentOffset[1]) + 1) / 2) + minValue;
+  float newBlue = (maxValue - minValue) * ((sin(currentOffset[2]) + 1) / 2) + minValue;
+
+  return color(newRed, newGreen, newBlue);
 }

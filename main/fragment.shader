@@ -3,12 +3,13 @@ precision mediump float;
 precision mediump int;
 #endif
 
-const int pointCount = 200;
+const int pointCount = 300;
 
 uniform vec2 dimentions;
 uniform float[pointCount * 3] points;
 uniform float depth;
-uniform vec3 colorDiv;
+uniform vec3 color1;
+uniform vec3 color2;
 
 varying vec4 vertColor;
 
@@ -32,13 +33,18 @@ void main() {
     }
   }
 
-  color.r = currentDistance / colorDiv.r;
-  color.g = currentDistance / colorDiv.g;
-  color.b = currentDistance / colorDiv.b;
+  vec4 firstColor = vec4(color1, 1.0f);
+  vec4 secondColor = vec4(color2, 1.0f);
 
-  color.r = map(color.r, 0, 1, 0.25, 1);
-  color.g = map(color.g, 0, 1, 0.25, 1);
-  color.b = map(color.b, 0, 1, 0.25, 1);
+  firstColor.r = map(color1.r, 0, 255, 0, 1);
+  firstColor.g = map(color1.r, 0, 255, 0, 1);
+  firstColor.b = map(color1.b, 0, 255, 0, 1);
+
+  secondColor.r = map(color2.r, 0, 255, 0, 1);
+  secondColor.g = map(color2.r, 0, 255, 0, 1);
+  secondColor.b = map(color2.b, 0, 255, 0, 1);
+
+  color = mix(firstColor, secondColor, currentDistance / 200);
 
   gl_FragColor = color;
 }
